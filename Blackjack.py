@@ -49,7 +49,7 @@ def print_choices(dealer_cards, player_cards):
         print("{} for {}".format(letter, move))
     print()
 
-def find_value(cards):
+def value(cards):
     total = 0
     aces = 0
     for card_face, suit in cards:
@@ -93,6 +93,15 @@ def round(bank):
 
         print_player_cards(player_cards)
 
+        if value(player_cards) == 21:
+            print("Blackjack!")
+            if value(dealer_cards) == 21:
+                print("Push!")
+            else:
+                bank += bet
+                print("You now have ${}\n".format(bank))
+            break
+
         print_choices(dealer_cards, player_cards)
 
         while True:
@@ -114,6 +123,7 @@ def round(bank):
                 print("\nYour bet is now ${}".format(bet))
             case "I":
                 pass
+                
         
 
 print("------Blackjack------")
