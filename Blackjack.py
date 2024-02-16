@@ -6,30 +6,34 @@ suits = ["hearts", "spades", "clubs", "diamonds"]
 
 cards = [(card, suit) for card in card_values for suit in suits]
 
-def deal_card():
+def deal_card(list):
     card, suit = random.choice(cards)
-    return [card, suit]
-    
-def display_cards(dealer_cards, player_cards):
-    print()
-    player_hand = "You have "
+    list.append([card, suit])
+
+def card_list(player_cards):
+    card_list = ""
     for i in range(len(player_cards)):
-        player_hand += "a " + str(player_cards[i][0]) + " of " + player_cards[i][1]
+        card_list += "a " + str(player_cards[i][0]) + " of " + player_cards[i][1]
         if i >= len(player_cards) - 2 and len(player_cards) > 2:
-            player_hand += ","
-        player_hand += " "
+            card_list += ","
+        card_list += " "
         if i == len(player_cards) - 2:
-            player_hand += "and "
-    dealer_hand = "The dealer has "
-    for i in range(len(dealer_cards)):
-        dealer_hand += "a " + str(player_cards[i][0]) + " of " + player_cards[i][1]
-        if i < len(dealer_cards) - 1 and len(dealer_cards) > 2:
-            dealer_hand += ","
-        dealer_hand += " "
-        if i == len(dealer_cards) - 2:
-            dealer_hand += "and "
+            card_list += "and "
+    return card_list
+
+def print_player_cards(player_cards):
+    player_hand = "You have " + card_list(player_cards)
+    print()
     print(player_hand)
-    print(dealer_hand)
+    
+
+
+def print_dealers_card(dealer_cards):
+    card_value, suit = dealer_cards[1]
+    string = "The dealer has a " + str(card_value) + " of " + suit
+    print()
+    print(string)
+    
     
 
 def choices(dealer_cards, player_cards):
@@ -60,19 +64,29 @@ def round(bank):
 
     print("You bet {} dollars".format(bet))
 
-    player_cards = [deal_card(), deal_card()]
+    player_cards = []
     
-    dealer_cards = [deal_card(), deal_card()]
+    dealer_cards = []
 
-    display_cards(dealer_cards, player_cards)
-
-    print_choices(dealer_cards, player_cards)
+    for i in range(2):
+        deal_card(player_cards)
+        deal_card(dealer_cards)
 
     while True:
-        player_move = input()
-        if player_move in choices(dealer_cards, player_cards).keys():
-            break
-        else:
-            print("invalid input, try again:")
-        
 
+        print_dealers_card(dealer_cards)
+
+        print_player_cards(player_cards)
+
+        print_choices(dealer_cards, player_cards)
+
+        while True:
+            player_move = input()
+            if player_move in choices(dealer_cards, player_cards).keys():
+                break
+            else:
+                print("invalid input, try again:")
+        
+            
+
+round(20)
