@@ -1,6 +1,6 @@
 import random
 
-
+bank = 1000
 card_values = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "jack", "king", "queen"]
 suits = ["hearts", "spades", "clubs", "diamonds"]
 cards = [(card, suit) for card in card_values for suit in suits]
@@ -24,15 +24,11 @@ def card_list(player_cards):
 def print_player_cards(player_cards):
     player_hand = "You have " + card_list(player_cards)
     print("\n" + player_hand)
-    
-
 
 def print_dealers_card(dealer_cards):
     card_value, suit = dealer_cards[1]
     string = "The dealer has a {} of {}".format(card_value, suit)
     print("\n" + string)
-    
-    
 
 def choices(dealer_cards, player_cards):
     choices = {"S": "stand", "H": "hit"}
@@ -53,7 +49,7 @@ def value(cards):
     total = 0
     aces = 0
     for card_face, suit in cards:
-        if card_face.is_digit():
+        if card_face.isdigit():
             total += int(card_face)
             continue
         if card_face in ["king", "queen", "jack"]: 
@@ -67,17 +63,20 @@ def value(cards):
             total += 1
     return total
 
-def round(bank):
+
+def round():
+    global bank
     print("You have ${}".format(bank))
     
     while True:
         bet = input("How much do you want to bet?\n")
         if bet.isdigit() and 1 <= int(bet) <= bank:
+            bet = int(bet)
             break
         else:
             print("Invalid amount")
 
-    print("You bet {} dollars".format(bet))
+    print("\n\nYou bet {} dollars".format(bet))
 
     player_cards = []
     
@@ -94,10 +93,11 @@ def round(bank):
         print_player_cards(player_cards)
 
         if value(player_cards) == 21:
-            print("Blackjack!")
+            print("\nBlackjack!")
             if value(dealer_cards) == 21:
                 print("Push!")
             else:
+                print("You win!")
                 bank += bet
                 print("You now have ${}\n".format(bank))
             break
@@ -121,12 +121,30 @@ def round(bank):
             case "D":
                 bet *= 2
                 print("\nYour bet is now ${}".format(bet))
+                card, suit = deal_card(player_cards)
+                print("\nYou got a {} of {}".format(card, suit))
             case "I":
-                pass
+                bet2 = int(bet/2)
+                if value(dealer_cards) == 21:
+                    print("The dealer has Blackjack!")
+                    print("You get ${}".format(bet))
+                else:
+                    print("The dealer does not have Blackjack")
+                    print("You lose ${}".format(bet2))
+                    bank -= bet2
                 
         
 
 print("------Blackjack------")
 print("Insurance pays 2 to 1")
 print("Blackjack pays 3 to 2\n")
-round(20)
+
+while True:
+    user_input = input("Would you like to play a round of Blackjack (y/n)?\n")
+    if user_input == "y":
+        round()
+    elif user_input == "n":
+        print("Come again!")
+        break
+    else:
+        print("invalid input, try again")
