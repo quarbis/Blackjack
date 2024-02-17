@@ -30,17 +30,17 @@ def print_dealers_card(dealer_cards):
     string = "The dealer has a {} of {}".format(card_value, suit)
     print("\n" + string)
 
-def choices(dealer_cards, player_cards):
+def choices(dealer_cards, player_cards, bet, turn1):
     choices = {"S": "stand", "H": "hit"}
-    if len(player_cards) == 2:
+    if turn1 and bet * 2 <= bank:
         choices["D"] = "double"
-    if dealer_cards[1][0] == "ace":
+    if turn1 and dealer_cards[1][0] == "ace":
         choices["I"] = "insurance"
     return choices
     
-def print_choices(dealer_cards, player_cards):
+def print_choices(dealer_cards, player_cards, bet, turn1):
     print("\nPress: ")
-    choice_list = choices(dealer_cards, player_cards)
+    choice_list = choices(dealer_cards, player_cards, bet, turn1)
     for letter, move in choice_list.items():
         print("{} for {}".format(letter, move))
     print()
@@ -63,8 +63,31 @@ def value(cards):
             total += 1
     return total
 
+def dealer_move(dealer_cards):
+    global bank
+    while True:
+        if value(dealer_cards) < 17:
+            print("The dealer drew a {} of {}".format(*deal_card(dealer_cards)))
+
+            print("The dealer's new total is {}".format(value(dealer_cards)))
+        else:
+            break
+
+def end_game(dealer_cards, player_cards, bet):
+    global bank
+    if value(dealer_cards) > value(player_cards):
+        print("You lost")
+        print("You lose ${}".format(bet))
+        bank -= bet
+    elif value(dealer_cards) < value(player_cards):
+        print("You won!")
+        print("You get ${}".format(bet))
+        bank += bet
+    elif value(dealer_cards) == value(player_cards):
+        print("Push!")
 
 def round():
+    turn1 = True
     global bank
     print("You have ${}".format(bank))
     
@@ -76,7 +99,7 @@ def round():
         else:
             print("Invalid amount")
 
-    print("\n\nYou bet {} dollars".format(bet))
+    print("\nYou bet {} dollars\n\n\n".format(bet))
 
     player_cards = []
     
@@ -92,21 +115,25 @@ def round():
 
         print_player_cards(player_cards)
 
+        print("Your total is " + str(value(player_cards)))
+
         if value(player_cards) == 21:
             print("\nBlackjack!")
+            print("The dealer has {}".format(card_list(dealer_cards)))
             if value(dealer_cards) == 21:
                 print("Push!")
             else:
                 print("You win!")
                 bank += bet
-                print("You now have ${}\n".format(bank))
+                print("You get ${}\n".format(bet))
             break
 
-        print_choices(dealer_cards, player_cards)
+        print_choices(dealer_cards, player_cards, bet, turn1)
 
         while True:
-            player_move = input()
-            if player_move in choices(dealer_cards, player_cards).keys():
+            player_move = input().upper()
+            if player_move in choices(dealer_cards, player_cards, bet, turn1).keys():
+                turn1 = False
                 break
             else:
                 print("invalid input, try again:")
@@ -116,13 +143,40 @@ def round():
             case "H":
                 card, suit = deal_card(player_cards)
                 print("\nYou got a {} of {}".format(card, suit))
+                if value(player_cards) > 21:
+                    print("\nYou broke!")
+                    print("You lose ${}".format(bet))
+                    bank -= bet
+                    break
             case "S":
+                print("The dealer's other card was a {} of {}".format(*dealer_cards[0]))
+                dealer_move(dealer_cards)
+                if value(dealer_cards) > 21:
+                    print("The dealer busted!")
+                    print("You won!")
+                    print("You get {}".format(bet))
+                    bank += bet
+                end_game(dealer_cards, player_cards, bet)
                 break
             case "D":
                 bet *= 2
                 print("\nYour bet is now ${}".format(bet))
                 card, suit = deal_card(player_cards)
                 print("\nYou got a {} of {}".format(card, suit))
+                if value(player_cards) > 21:
+                    print("You now have {}, totaling {}".format(card_list(player_cards), value(cards)))
+                    print("You broke!")
+                    print("You lose ${}".format(bet))
+                    bank -= bet
+                    break
+                dealer_move(dealer_cards)
+                if value(dealer_cards) > 21:
+                    print("The dealer busted!")
+                    print("You won!")
+                    print("You get {}".format(bet))
+                    bank += bet
+                    break
+                end_game(dealer_cards, player_cards, bet)
             case "I":
                 bet2 = int(bet/2)
                 if value(dealer_cards) == 21:
